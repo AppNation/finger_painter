@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:finger_painter/finger_painter.dart';
@@ -44,8 +43,8 @@ class _MyAppState extends State<MyApp> {
             Painter(
               controller: painterController,
               backgroundColor: const Color(0xFFF0F0F0),
-              onDrawingEnded: (bytes) async {
-                print('${painterController.getPoints()?.length} drawn points');
+              onDrawingEnded: (String referrer, bytes) async {
+                debugPrint('${painterController.getPoints()?.length} drawn points');
                 setState(() {});
               },
               size: const Size(double.infinity, 250),

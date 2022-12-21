@@ -29,15 +29,18 @@ class PainterController {
   Function({Color? clearColor})? _clearContent;
   Function? _setPenType;
   Function(Uint8List)? _setBackgroundImage;
+  Function(Uint8List)? _setPrevImage;
 
   _setController(
     Function({Color? clearColor}) clearContent,
     Function(PenType type)? setPenType,
     Function(Uint8List)? setBackgroundImage,
+    Function(Uint8List)? setPrevImage,
   ) {
     _clearContent = clearContent;
     _setPenType = setPenType;
     _setBackgroundImage = setBackgroundImage;
+    _setPrevImage = setPrevImage;
   }
 
   PenState? getState() {
@@ -83,6 +86,10 @@ class PainterController {
   setBackgroundImage(Uint8List image) {
     if (_setBackgroundImage != null) _setBackgroundImage!(image);
   }
+
+  setPreviousImage(Uint8List prevImage) {
+    if (_setPrevImage != null) _setPrevImage!(prevImage);
+  }
 }
 
 /// Main painter class.
@@ -99,7 +106,7 @@ class Painter extends StatefulWidget {
   final Widget? child;
   final Color backgroundColor;
   final Size? size;
-  final Function(Uint8List? imgBytes)? onDrawingEnded;
+  final Function(String referrer, Uint8List? imgBytes)? onDrawingEnded;
 
   // painter controller
   final PainterController? controller;
@@ -130,10 +137,19 @@ class _PainterState extends State<Painter> {
     _size = widget.size;
     _completer = Completer<Size>();
 
-    print('****************** ${penState.penType}');
+    debugPrint('****************** ${penState.penType}');
     _setPenType(penState.penType);
-    widget.controller
-        ?._setController(_clearContent, _setPenType, _setBackgroundImage);
+    widget.controller?._setController(
+        _clearContent, _setPenType, _setBackgroundImage, _setPrevImage);
+  }
+
+  _setPrevImage(Uint8List? prevImageBytes) {
+    if (prevImageBytes != null) {
+      _setBackgroundImage(prevImageBytes);
+      if (widget.onDrawingEnded != null) {
+        widget.onDrawingEnded!("undo", prevImageBytes);
+      }
+    }
   }
 
   _clearContent({Color? clearColor}) {
@@ -151,7 +167,7 @@ class _PainterState extends State<Painter> {
       }
       image = _setBackgroundImage(imgBytesList!);
       if (widget.onDrawingEnded != null) {
-        widget.onDrawingEnded!(imgBytesList);
+        widget.onDrawingEnded!("flow", imgBytesList);
       }
       drawing.points.clear();
     }
@@ -174,7 +190,7 @@ class _PainterState extends State<Painter> {
     }
     pen.onImageSaved = (imgBytesList) {
       if (widget.onDrawingEnded != null) {
-        widget.onDrawingEnded!(imgBytesList!);
+        widget.onDrawingEnded!("flow", imgBytesList!);
       }
       drawing.points.clear();
     };
