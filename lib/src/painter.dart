@@ -29,18 +29,18 @@ class PainterController {
   Function({Color? clearColor})? _clearContent;
   Function? _setPenType;
   Function(Uint8List)? _setBackgroundImage;
-  Function(Uint8List)? _setPrevImage;
+  Function(Uint8List)? _setCurrentStateImage;
 
   _setController(
     Function({Color? clearColor}) clearContent,
     Function(PenType type)? setPenType,
     Function(Uint8List)? setBackgroundImage,
-    Function(Uint8List)? setPrevImage,
+    Function(Uint8List)? setCurrentStateImage,
   ) {
     _clearContent = clearContent;
     _setPenType = setPenType;
     _setBackgroundImage = setBackgroundImage;
-    _setPrevImage = setPrevImage;
+    _setCurrentStateImage = setCurrentStateImage;
   }
 
   PenState? getState() {
@@ -87,8 +87,8 @@ class PainterController {
     if (_setBackgroundImage != null) _setBackgroundImage!(image);
   }
 
-  setPreviousImage(Uint8List prevImage) {
-    if (_setPrevImage != null) _setPrevImage!(prevImage);
+  setCurrentStateImage(Uint8List prevImage) {
+    if (_setCurrentStateImage != null) _setCurrentStateImage!(prevImage);
   }
 }
 
@@ -140,14 +140,14 @@ class _PainterState extends State<Painter> {
     debugPrint('****************** ${penState.penType}');
     _setPenType(penState.penType);
     widget.controller?._setController(
-        _clearContent, _setPenType, _setBackgroundImage, _setPrevImage);
+        _clearContent, _setPenType, _setBackgroundImage, _setCurrentStateImage);
   }
 
-  _setPrevImage(Uint8List? prevImageBytes) {
-    if (prevImageBytes != null) {
-      _setBackgroundImage(prevImageBytes);
+  _setCurrentStateImage(Uint8List? stateImageBytes) {
+    if (stateImageBytes != null) {
+      _setBackgroundImage(stateImageBytes);
       if (widget.onDrawingEnded != null) {
-        widget.onDrawingEnded!("undo", prevImageBytes);
+        widget.onDrawingEnded!("redo-undo", stateImageBytes);
       }
     }
   }
