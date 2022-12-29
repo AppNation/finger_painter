@@ -31,12 +31,10 @@ class PainterController {
   Function(Uint8List)? _setBackgroundImage;
   Function(Uint8List)? _setCurrentStateImage;
 
-  _setController(
-    Function({Color? clearColor}) clearContent,
-    Function(PenType type)? setPenType,
-    Function(Uint8List)? setBackgroundImage,
-    Function(Uint8List)? setCurrentStateImage,
-  ) {
+  _setController(Function({Color? clearColor}) clearContent,
+      Function(PenType type)? setPenType,
+      Function(Uint8List)? setBackgroundImage,
+      Function(Uint8List)? setCurrentStateImage,) {
     _clearContent = clearContent;
     _setPenType = setPenType;
     _setBackgroundImage = setBackgroundImage;
@@ -159,15 +157,17 @@ class _PainterState extends State<Painter> {
       } else {
         imgBytesList =
             Bmp32Header.setBmp(imgBytesList!).setBitmapBackgroundColor(
-          clearColor.red,
-          clearColor.green,
-          clearColor.blue,
-          clearColor.alpha,
-        );
+              clearColor.red,
+              clearColor.green,
+              clearColor.blue,
+              clearColor.alpha,
+            );
       }
-      image = _setBackgroundImage(imgBytesList!);
-      if (widget.onDrawingEnded != null) {
-        widget.onDrawingEnded!("flow", imgBytesList);
+      if (mounted) {
+        image = _setBackgroundImage(imgBytesList!);
+        if (widget.onDrawingEnded != null) {
+          widget.onDrawingEnded!("flow", imgBytesList);
+        }
       }
       drawing.points.clear();
     }
@@ -201,7 +201,7 @@ class _PainterState extends State<Painter> {
     ui.decodeImageFromList(imageBytes, (ui.Image img) async {
       image = img;
       ByteData? imgBytes =
-          await img.toByteData(format: ui.ImageByteFormat.rawRgba);
+      await img.toByteData(format: ui.ImageByteFormat.rawRgba);
       if (imgBytes != null) {
         Bmp32Header header = Bmp32Header.setHeader(img.width, img.height);
         imgBytesList = header.storeBitmap(imgBytes.buffer.asUint8List());
