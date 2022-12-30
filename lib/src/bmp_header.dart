@@ -6,7 +6,7 @@ class Bmp32Header {
   late int height;
   late Uint8List bmp;
   late int contentSize;
-  int rgba32HeaderSize = 122;
+  static int rgba32HeaderSize = 122;
   int bytesPerPixel = 4;
 
   /// set a BMP from bytes

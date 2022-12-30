@@ -30,17 +30,19 @@ class PainterController {
   Function? _setPenType;
   Function(Uint8List)? _setBackgroundImage;
   Function(Uint8List)? _setCurrentStateImage;
+  Function? _getEmptyImageBytes;
 
   _setController(
-    Function({Color? clearColor}) clearContent,
-    Function(PenType type)? setPenType,
-    Function(Uint8List)? setBackgroundImage,
-    Function(Uint8List)? setCurrentStateImage,
-  ) {
+      Function({Color? clearColor}) clearContent,
+      Function(PenType type)? setPenType,
+      Function(Uint8List)? setBackgroundImage,
+      Function(Uint8List)? setCurrentStateImage,
+      Function getEmptyImageBytes) {
     _clearContent = clearContent;
     _setPenType = setPenType;
     _setBackgroundImage = setBackgroundImage;
     _setCurrentStateImage = setCurrentStateImage;
+    _getEmptyImageBytes = getEmptyImageBytes;
   }
 
   PenState? getState() {
@@ -89,6 +91,10 @@ class PainterController {
 
   setCurrentStateImage(Uint8List prevImage) {
     if (_setCurrentStateImage != null) _setCurrentStateImage!(prevImage);
+  }
+
+  getEmptyImageBytes() {
+    if (_getEmptyImageBytes != null) return _getEmptyImageBytes!();
   }
 }
 
@@ -139,8 +145,16 @@ class _PainterState extends State<Painter> {
 
     debugPrint('****************** ${penState.penType}');
     _setPenType(penState.penType);
-    widget.controller?._setController(
-        _clearContent, _setPenType, _setBackgroundImage, _setCurrentStateImage);
+    widget.controller?._setController(_clearContent, _setPenType,
+        _setBackgroundImage, _setCurrentStateImage, _getEmptyImageBytes);
+  }
+
+  Uint8List _getEmptyImageBytes() {
+    List<int> headerBytes =
+        imgBytesList!.sublist(0, Bmp32Header.rgba32HeaderSize);
+    List<int> imgBytes = List.generate(imgBytesList!.length - Bmp32Header.rgba32HeaderSize, (index) => 0);
+    Uint8List emptyImageBytes = Uint8List.fromList(headerBytes+imgBytes);
+    return emptyImageBytes;
   }
 
   _setCurrentStateImage(Uint8List? stateImageBytes) {
